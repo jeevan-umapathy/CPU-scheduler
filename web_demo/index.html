@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CPU Scheduling Simulator</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand-copy">
+      <strong>CPU Scheduling Simulator</strong>
+      <span>FCFS · SJF · Round Robin · Adaptive Hybrid</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="control-panel">
+      <h1>Workload</h1>
+
+      <label class="field-label" for="preset">Scenario</label>
+      <select id="preset">
+        <option value="low">Low variance</option>
+        <option value="high">High variance</option>
+        <option value="heavy">Heavy ready queue</option>
+        <option value="custom">Custom</option>
+      </select>
+      <p id="preset-note" class="field-note"></p>
+
+      <div class="table-heading">
+        <span class="field-label">Processes</span>
+        <button id="add-process" class="text-button" type="button">+ Add process</button>
+      </div>
+      <div class="editable-table-wrap">
+        <table class="editable-table">
+          <thead><tr><th>PID</th><th>Arrival</th><th>Burst</th><th><span class="sr-only">Remove</span></th></tr></thead>
+          <tbody id="process-rows"></tbody>
+        </table>
+      </div>
+
+      <details class="settings">
+        <summary>Scheduler settings <span>↗</span></summary>
+        <div class="settings-grid">
+          <label>CV threshold<input id="cv-threshold" type="number" min="0" max="5" step="0.05" value="0.5"></label>
+          <label>Queue threshold<input id="queue-threshold" type="number" min="1" max="30" step="1" value="4"></label>
+          <label>Aging threshold<input id="aging-threshold" type="number" min="1" max="1000" step="1" value="15"></label>
+          <label>Min. quantum<input id="min-quantum" type="number" min="1" max="1000" step="1" value="2"></label>
+          <label>Max. quantum<input id="max-quantum" type="number" min="1" max="1000" step="1" value="8"></label>
+          <label>Standard RR quantum<input id="rr-quantum" type="number" min="1" max="1000" step="1" value="4"></label>
+        </div>
+      </details>
+
+      <button id="run-button" class="run-button" type="button">Run simulation <span>→</span></button>
+      <p id="error-message" class="error-message" role="alert" hidden></p>
+    </aside>
+
+    <div class="workspace">
+      <nav class="tabs" aria-label="Result views">
+        <button class="tab active" type="button" data-view="replay" aria-selected="true">Decision replay</button>
+        <button class="tab" type="button" data-view="timeline" aria-selected="false">Execution timeline</button>
+        <button class="tab" type="button" data-view="compare" aria-selected="false">Compare algorithms</button>
+      </nav>
+
+      <section id="replay-view" class="view active">
+        <div class="view-head">
+          <h2>Hybrid decisions</h2>
+          <span id="run-status" class="status-pill">Ready to run</span>
+        </div>
+        <div id="replay-empty" class="empty-state">Run the simulation to see each hybrid decision.</div>
+        <div id="replay-content" hidden>
+          <div class="step-bar">
+            <span class="eyebrow">DECISION <strong id="step-number">1 / 1</strong></span>
+            <div class="step-controls">
+              <button id="prev-step" type="button" aria-label="Previous decision">←</button>
+              <input id="step-range" type="range" min="0" max="0" value="0" aria-label="Decision number">
+              <button id="next-step" type="button" aria-label="Next decision">→</button>
+            </div>
+          </div>
+          <div class="decision-head">
+            <div><span class="eyebrow">AT TIME <strong id="decision-time">0</strong></span><h3 id="decision-title">SJF selects P1</h3></div>
+            <span id="mode-badge" class="mode-badge">SJF</span>
+          </div>
+          <div class="measure-row">
+            <div class="measure"><small>BURST VARIATION (CV)</small><strong id="decision-cv">0.000</strong><span id="cv-rule"></span></div>
+            <div class="measure"><small>READY QUEUE</small><strong id="decision-queue">1</strong><span id="queue-rule"></span></div>
+            <div class="measure"><small>RR QUANTUM</small><strong id="decision-quantum">—</strong><span>median, clamped to limits</span></div>
+            <div class="measure"><small>CPU INTERVAL</small><strong id="decision-interval">0 → 4</strong><span>time units</span></div>
+          </div>
+          <div class="replay-detail">
+            <div><div class="minor-heading">READY QUEUE BEFORE SELECTION</div><div id="ready-queue" class="queue-cards"></div></div>
+            <div class="reason-card"><div class="minor-heading">DECISION RULE</div><p id="decision-reason"></p></div>
+          </div>
+          <div class="mini-heading-row"><div class="minor-heading">MODE CHANGE LOG</div></div>
+          <div id="mode-history" class="history-list"></div>
+        </div>
+      </section>
+
+      <section id="timeline-view" class="view">
+        <div class="view-head"><h2>Execution timeline</h2></div>
+        <label class="inline-select">Algorithm <select id="timeline-algorithm"><option>Adaptive Hybrid</option><option>Round Robin</option><option>SJF</option><option>FCFS</option></select></label>
+        <div id="timeline-empty" class="empty-state">Run a scenario to draw its execution timeline.</div>
+        <div id="timeline-content" hidden>
+          <div id="timeline-chart" class="timeline-chart"></div>
+          <div class="section-label result-label">PROCESS RESULTS</div>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>PID</th><th>Arrival</th><th>Burst</th><th>Completion</th><th>Waiting</th><th>Turnaround</th><th>Response</th></tr></thead><tbody id="result-rows"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="compare-view" class="view">
+        <div class="view-head"><h2>Algorithm comparison</h2></div>
+        <p class="view-intro">All four algorithms use the same workload.</p>
+        <div id="compare-empty" class="empty-state">Run a scenario to compare FCFS, SJF, RR, and Adaptive Hybrid.</div>
+        <div id="compare-content" hidden>
+          <label class="inline-select">Metric <select id="compare-metric">
+            <option value="avg_waiting">Average waiting time</option>
+            <option value="avg_turnaround">Average turnaround time</option>
+            <option value="avg_response">Average response time</option>
+            <option value="throughput">Throughput</option>
+            <option value="cpu_utilization">CPU utilization</option>
+            <option value="context_switches">Context switches</option>
+          </select></label>
+          <p id="metric-note" class="field-note"></p>
+          <div id="comparison-bars" class="comparison-bars"></div>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>Algorithm</th><th>Wait</th><th>Turnaround</th><th>Response</th><th>Throughput</th><th>CPU %</th><th>Switches</th></tr></thead><tbody id="comparison-rows"></tbody></table></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

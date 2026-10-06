@@ -79,6 +79,15 @@ def hybrid(
 
         ready_snapshot = list(ready_queue)
         cv, queue_length = analyze_workload(ready_snapshot)
+        ready_state = [
+            {
+                "pid": process.pid,
+                "remaining": process.remaining_time,
+                "waited": current_time - process.arrival_time
+                - (process.burst_time - process.remaining_time),
+            }
+            for process in ready_snapshot
+        ]
         normal_mode = (
             "SJF"
             if cv < cv_threshold and queue_length < queue_threshold
@@ -145,6 +154,7 @@ def hybrid(
                 "Start": start,
                 "End": current_time,
                 "Aging Override": aging_override,
+                "Ready State": ready_state,
             }
         )
 

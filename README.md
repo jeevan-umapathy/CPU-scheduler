@@ -1,90 +1,75 @@
 # Adaptive CPU Scheduling Simulator
 
-This undergraduate Operating Systems project simulates and compares FCFS,
-non-preemptive SJF, Round Robin, and an Adaptive Hybrid CPU Scheduler. The
-hybrid contribution is workload awareness: it observes the ready queue and
-chooses an established scheduling policy that fits the current state.
+This project compares FCFS, non-preemptive SJF, Round Robin, and an Adaptive
+Hybrid CPU Scheduler. The hybrid scheduler measures the current ready queue
+and chooses between SJF and RR. The browser interface lets you inspect each
+decision, execution interval, and comparison result.
 
-## Hybrid scheduling logic
+## Run
 
-At every scheduling decision, the hybrid scheduler updates a FIFO ready queue,
-computes the coefficient of variation (CV) of remaining burst times, and checks
-the number of ready processes.
+Python 3.11 or newer is sufficient; the website has no third-party package
+dependencies. From the project root:
 
-- **SJF** is selected when `CV < CV_THRESHOLD` and
-  `queue length < QUEUE_THRESHOLD`. A selected SJF process runs to completion.
-- **Round Robin** is selected when variation is high or the queue is heavily
-  loaded. It uses true FIFO rotation, including processes that arrive during a
-  time slice.
-- **Dynamic quantum** is the median remaining burst time of ready processes,
-  clamped to `MIN_QUANTUM` and `MAX_QUANTUM` (defaults: 2 and 8).
-- **Aging protection** checks actual accumulated waiting time
-  (`current time - arrival time - CPU time already received`). A process that
-  crosses the experimental threshold (default: 15) receives one opportunity.
-  It cannot immediately retrigger; it must accumulate another threshold of
-  waiting first. Aging is logged as an override of SJF or RR, not as a separate
-  algorithm.
-
-The simulator keeps a full per-execution log for debugging and a smaller
-history containing only initial state, mode changes, aging overrides, and RR
-quantum changes of at least two time units.
-
-## Run the application
-
-```bash
-python -m pip install -r requirements.txt
-streamlit run app.py
+```powershell
+python web_demo\server.py
 ```
 
-The interface contains three tabs:
+Open <http://127.0.0.1:8502> and keep the terminal open. If using the existing
+virtual environment, `.\venv\Scripts\python.exe web_demo\server.py` works too.
 
-1. **Simulator** runs one selected algorithm and shows its process results,
-   metrics, and visualization.
-2. **Hybrid Analysis** exposes threshold settings and shows workload state,
-   clean mode history, aging events, and the expandable full log.
-3. **Comparison** runs all four algorithms on exactly the same workload and
-   charts one selected metric.
+## Hybrid logic
 
-FCFS and SJF use a compact Gantt chart. RR and Adaptive Hybrid use process-lane
-timelines so that many time slices remain readable.
+At each decision, the scheduler observes the FIFO ready queue and computes
+the coefficient of variation (CV) of remaining burst times.
 
-## Modules
+- Use SJF when `CV < CV_THRESHOLD` and the number of ready processes is below
+  `QUEUE_THRESHOLD`. The selected process runs to completion.
+- Otherwise use FIFO Round Robin. New arrivals join the queue before the
+  preempted process is appended again.
+- In RR mode, use the median remaining burst time as the quantum, clamped
+  between `MIN_QUANTUM` and `MAX_QUANTUM` (2 and 8 by default).
+- If a process accumulates at least `AGING_THRESHOLD` waiting time (15 by
+  default), give it an execution opportunity. Another full threshold of
+  waiting is required before a second override.
 
-- `process.py`: process state used by every scheduler.
-- `fcfs.py`: First Come First Served.
-- `sjf.py`: non-preemptive Shortest Job First.
-- `rr.py`: fixed-quantum FIFO Round Robin.
-- `hybrid.py`: adaptive selection, dynamic quantum, aging, and logs.
-- `workload.py`: remaining-burst CV and ready-queue length calculation.
-- `metrics.py`: common evaluation metrics.
-- `app.py`: Streamlit interface and charts.
-- `test_scheduler.py`: deterministic scheduler and invariant tests.
+The scheduler records every execution event and a shorter history of mode
+changes, aging overrides, and significant quantum changes. The website
+shows the ready queue before each decision, the selected process, the rule
+used, and the resulting CPU interval.
 
-## Evaluation metrics
+## Files
 
-- **Waiting time:** turnaround time minus CPU burst time.
-- **Turnaround time:** completion time minus arrival time.
-- **Response time:** first CPU start time minus arrival time.
-- **Throughput:** completed processes divided by elapsed time from time zero.
-- **CPU utilization:** busy CPU time divided by elapsed time from time zero.
-- **Context switches:** changes from one process PID to a different PID between
-  adjacent execution intervals. Consecutive slices of the same process do not
-  add a switch.
+- `web_demo/index.html`, `style.css`, `app.js`: browser interface.
+- `web_demo/server.py`: local HTTP server and input validation; calls the
+  Python schedulers below.
+- `process.py`: process state.
+- `fcfs.py`, `sjf.py`, `rr.py`: baseline scheduling algorithms.
+- `hybrid.py`: adaptive mode selection, dynamic quantum, aging, and logs.
+- `workload.py`: CV and ready queue length.
+- `metrics.py`: common metrics.
+- `test_scheduler.py`, `web_demo/test_server.py`: deterministic tests.
+
+## Metrics
+
+Waiting time is turnaround minus CPU burst. Turnaround is completion minus
+arrival. Response is first CPU start minus arrival. Throughput is completed
+processes per unit of elapsed time from time zero. CPU utilization is busy
+time divided by that elapsed time. Context switches count changes from one
+process PID to another between adjacent intervals.
 
 ## Tests
 
-```bash
-python -m unittest -v test_scheduler.py
+```powershell
+python -m unittest -v test_scheduler.py web_demo.test_server
 ```
 
-The test workloads cover simultaneous arrivals, initial CPU idle time, low and
-high variance, heavy load, a very long process, a single process, RR arrivals,
-aging, hybrid mode switching, metric behavior, and completion invariants.
+## Demonstration
 
-## Scope and limitations
+Run Low Variance to inspect SJF decisions. Run High Variance and step from
+the first SJF decision to the CV-driven RR decision. Run Heavy Ready Queue
+to show that queue size can trigger RR even when burst times are equal.
+Then use the timeline and comparison views on the same workload.
 
-This is a discrete, single-CPU educational simulator. Burst times are known in
-advance, scheduling overhead is assumed to be zero, and context-switch cost and
-I/O blocking are not modeled. Threshold defaults are experimental parameters,
-not claimed optimal values. Combining SJF and RR is not itself presented as a
-novel algorithm.
+This is a discrete, single-CPU simulator. Burst times are assumed known;
+I/O blocking, context-switch cost, and multicore scheduling are not modeled.
+Thresholds are experimental rather than claimed optimal values.
