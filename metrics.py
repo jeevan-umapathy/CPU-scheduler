@@ -1,7 +1,12 @@
+from statistics import pstdev
+
+
 def calculate_metrics(processes, gantt):
     if not processes:
         return {
             "avg_waiting": 0,
+            "max_waiting": 0,
+            "waiting_stddev": 0,
             "avg_turnaround": 0,
             "avg_response": 0,
             "throughput": 0,
@@ -10,7 +15,10 @@ def calculate_metrics(processes, gantt):
         }
 
     count = len(processes)
-    avg_waiting = sum(p.waiting_time for p in processes) / count
+    waiting_times = [p.waiting_time for p in processes]
+    avg_waiting = sum(waiting_times) / count
+    max_waiting = max(waiting_times)
+    waiting_stddev = pstdev(waiting_times)
     avg_turnaround = sum(p.turnaround_time for p in processes) / count
     avg_response = sum(p.response_time for p in processes) / count
 
@@ -31,6 +39,8 @@ def calculate_metrics(processes, gantt):
 
     return {
         "avg_waiting": avg_waiting,
+        "max_waiting": max_waiting,
+        "waiting_stddev": waiting_stddev,
         "avg_turnaround": avg_turnaround,
         "avg_response": avg_response,
         "throughput": throughput,

@@ -34,3 +34,9 @@ library HTTP server. No npm installation or build step is needed.
 
 The website presents the Python scheduling results and lets you inspect each
 hybrid decision. The contribution remains the workload aware scheduling logic.
+
+The Hybrid scheduler is not expected to outperform SJF on every metric. SJF is
+naturally strong for average waiting time when burst times are known. The
+Hybrid approach instead evaluates a trade-off between average performance,
+responsiveness, worst-case waiting, and starvation prevention. The comparison
+view includes maximum waiting time and waiting-time standard deviation.

@@ -57,6 +57,15 @@ processes per unit of elapsed time from time zero. CPU utilization is busy
 time divided by that elapsed time. Context switches count changes from one
 process PID to another between adjacent intervals.
 
+Maximum waiting time is the largest wait experienced by one process.
+Waiting-time standard deviation is the population standard deviation of
+process waiting times; it shows how unevenly waiting is distributed.
+
+The Hybrid scheduler is not expected to outperform SJF on every metric. SJF is
+naturally strong for average waiting time when burst times are known. The
+Hybrid approach instead evaluates a trade-off between average performance,
+responsiveness, worst-case waiting, and starvation prevention.
+
 ## Tests
 
 ```powershell

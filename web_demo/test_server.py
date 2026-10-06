@@ -20,6 +20,8 @@ class WebsiteServerTests(unittest.TestCase):
                 {"P1": 2, "P2": 20, "P3": 3},
             )
             self.assertEqual(sum(block["end"] - block["start"] for block in run["gantt"]), 25)
+            self.assertIn("max_waiting", run["metrics"])
+            self.assertIn("waiting_stddev", run["metrics"])
         self.assertEqual(result["hybrid"]["log"][0]["Ready State"][0]["pid"], "P1")
 
     def test_invalid_input_is_rejected(self):

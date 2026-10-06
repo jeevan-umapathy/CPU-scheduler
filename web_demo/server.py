@@ -101,13 +101,14 @@ def run_simulation(payload):
 
     algorithms = {}
     for name, (finished, intervals) in runs.items():
+        run_metrics = calculate_metrics(finished, intervals)
         algorithms[name] = {
             "processes": [process_data(process) for process in finished],
             "gantt": [
                 {"pid": pid, "start": start, "end": end}
                 for pid, start, end in intervals
             ],
-            "metrics": calculate_metrics(finished, intervals),
+            "metrics": run_metrics,
         }
     return {
         "algorithms": algorithms,

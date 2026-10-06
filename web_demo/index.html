@@ -109,11 +109,13 @@
 
       <section id="compare-view" class="view">
         <div class="view-head"><h2>Algorithm comparison</h2></div>
-        <p class="view-intro">All four algorithms use the same workload.</p>
+        <p class="view-intro">When workload variation or queue pressure becomes high, the scheduler favors Round Robin to improve fairness and responsiveness, even if SJF may still produce a lower average waiting time.</p>
         <div id="compare-empty" class="empty-state">Run a scenario to compare FCFS, SJF, RR, and Adaptive Hybrid.</div>
         <div id="compare-content" hidden>
           <label class="inline-select">Metric <select id="compare-metric">
             <option value="avg_waiting">Average waiting time</option>
+            <option value="max_waiting">Maximum waiting time</option>
+            <option value="waiting_stddev">Waiting-time standard deviation</option>
             <option value="avg_turnaround">Average turnaround time</option>
             <option value="avg_response">Average response time</option>
             <option value="throughput">Throughput</option>
@@ -122,7 +124,7 @@
           </select></label>
           <p id="metric-note" class="field-note"></p>
           <div id="comparison-bars" class="comparison-bars"></div>
-          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>Algorithm</th><th>Wait</th><th>Turnaround</th><th>Response</th><th>Throughput</th><th>CPU %</th><th>Switches</th></tr></thead><tbody id="comparison-rows"></tbody></table></div>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>Algorithm</th><th>Avg wait</th><th>Max wait</th><th>Wait std dev</th><th>Turnaround</th><th>Response</th><th>Throughput</th><th>CPU %</th><th>Switches</th></tr></thead><tbody id="comparison-rows"></tbody></table></div>
         </div>
       </section>
     </div>

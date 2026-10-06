@@ -132,6 +132,20 @@ class SchedulerTests(unittest.TestCase):
         artificial_gantt = [("P1", 0, 1), ("P1", 1, 2), ("P2", 2, 4), ("P1", 4, 6)]
         self.assertEqual(calculate_metrics(result, artificial_gantt)["context_switches"], 2)
 
+    def test_waiting_fairness_metrics(self):
+        result, gantt = fcfs(make_processes(
+            [("P1", 0, 1), ("P2", 0, 1), ("P3", 0, 1)]
+        ))
+        values = calculate_metrics(result, gantt)
+        self.assertEqual(values["max_waiting"], 2)
+        self.assertAlmostEqual(values["waiting_stddev"], (2 / 3) ** 0.5)
+        self.assertGreaterEqual(values["waiting_stddev"], 0)
+
+    def test_empty_fairness_metrics(self):
+        values = calculate_metrics([], [])
+        self.assertEqual(values["max_waiting"], 0)
+        self.assertEqual(values["waiting_stddev"], 0)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

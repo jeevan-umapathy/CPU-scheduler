@@ -21,6 +21,8 @@ const scenarios = {
 
 const metricDescriptions = {
   avg_waiting: "Lower is better · average time ready but not running.",
+  max_waiting: "Lower is better · worst waiting time experienced by any process.",
+  waiting_stddev: "Lower means waiting time is distributed more evenly across processes.",
   avg_turnaround: "Lower is better · average time from arrival to completion.",
   avg_response: "Lower is better · average delay until a process first gets CPU time.",
   throughput: "Higher is better · completed processes per time unit.",
@@ -309,7 +311,7 @@ function renderComparison() {
     const values = data[name].metrics;
     const row = node("tr");
     row.append(node("td", "", name));
-    for (const key of ["avg_waiting", "avg_turnaround", "avg_response", "throughput", "cpu_utilization", "context_switches"]) {
+    for (const key of ["avg_waiting", "max_waiting", "waiting_stddev", "avg_turnaround", "avg_response", "throughput", "cpu_utilization", "context_switches"]) {
       row.append(node("td", "", formatMetric(key, values[key])));
     }
     table.append(row);
