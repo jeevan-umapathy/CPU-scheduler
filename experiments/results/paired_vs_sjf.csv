@@ -1,0 +1,36 @@
+family,metric,hybrid_better_than_sjf,tied,sjf_better
+Similar/sparse,avg_waiting,0,22,8
+Similar/sparse,max_waiting,8,22,0
+Similar/sparse,waiting_stddev,8,22,0
+Similar/sparse,avg_response,0,22,8
+Similar/sparse,context_switches,0,30,0
+Similar/dense,avg_waiting,0,0,30
+Similar/dense,max_waiting,17,13,0
+Similar/dense,waiting_stddev,15,0,15
+Similar/dense,avg_response,25,0,5
+Similar/dense,context_switches,0,1,29
+Mixed/dense,avg_waiting,0,0,30
+Mixed/dense,max_waiting,9,14,7
+Mixed/dense,waiting_stddev,16,0,14
+Mixed/dense,avg_response,29,0,1
+Mixed/dense,context_switches,0,0,30
+High-variance/staggered,avg_waiting,0,0,30
+High-variance/staggered,max_waiting,25,4,1
+High-variance/staggered,waiting_stddev,26,0,4
+High-variance/staggered,avg_response,2,0,28
+High-variance/staggered,context_switches,0,0,30
+Short+long/batch,avg_waiting,0,0,30
+Short+long/batch,max_waiting,7,15,8
+Short+long/batch,waiting_stddev,2,0,28
+Short+long/batch,avg_response,20,0,10
+Short+long/batch,context_switches,0,0,30
+Moderate/staggered,avg_waiting,0,0,30
+Moderate/staggered,max_waiting,29,1,0
+Moderate/staggered,waiting_stddev,29,0,1
+Moderate/staggered,avg_response,0,0,30
+Moderate/staggered,context_switches,0,0,30
+ALL (equal trials),avg_waiting,0,22,158
+ALL (equal trials),max_waiting,95,69,16
+ALL (equal trials),waiting_stddev,96,22,62
+ALL (equal trials),avg_response,76,22,82
+ALL (equal trials),context_switches,0,31,149

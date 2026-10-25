@@ -1,0 +1,25 @@
+{
+  "generated_date": "2026-10-25",
+  "project": "Adaptive Hybrid CPU Scheduling Using SJF and Round Robin for Dynamic Workloads",
+  "source": "GitHub repo jeevan-umapathy/CPU-scheduler, source files read using connected GitHub app",
+  "algorithm_settings": {
+    "cv_threshold": 0.5,
+    "queue_threshold": 4,
+    "aging_threshold": 15,
+    "min_quantum": 2,
+    "max_quantum": 8,
+    "fixed_rr_quantum": 4
+  },
+  "trials_per_family": 30,
+  "families": [
+    "Similar/sparse",
+    "Similar/dense",
+    "Mixed/dense",
+    "High-variance/staggered",
+    "Short+long/batch",
+    "Moderate/staggered"
+  ],
+  "seeds": "20261025 + family_index*1009 + trial_number (1..30)",
+  "process_count": "24 for Similar/dense, 20 for all others",
+  "caveat": "Synthetic deterministic simulations; no measured OS context-switch penalty, scheduling computation overhead, or real application I/O."
+}
